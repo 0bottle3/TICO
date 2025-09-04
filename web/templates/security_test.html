@@ -1,0 +1,453 @@
+{% extends "base.html" %}
+
+{% block title %}보안 테스트 - AI 보안 테스트 시스템{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-bug text-primary me-2"></i>
+        보안 테스트
+    </h1>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <form method="post" action="/security-test/start">
+            <!-- 대상 설정 -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-crosshairs me-2"></i>
+                        테스트 대상
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">대상 URL 또는 도메인</label>
+                        <input type="url" class="form-control form-control-lg" name="target_url" 
+                               placeholder="https://example.com" required>
+                        <div class="form-text">테스트할 웹사이트, API, 또는 애플리케이션의 URL을 입력하세요</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">대상 유형</label>
+                        <select class="form-select" name="target_type" required>
+                            <option value="web_application">웹 애플리케이션</option>
+                            <option value="rest_api">REST API</option>
+                            <option value="graphql_api">GraphQL API</option>
+                            <option value="mobile_backend">모바일 백엔드</option>
+                            <option value="wordpress">WordPress</option>
+                            <option value="ecommerce">전자상거래</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 단계별 보안 테스트 -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list-ol me-2"></i>
+                        단계별 보안 테스트 선택
+                    </h5>
+                    <small class="text-muted">순서대로 진행하거나 원하는 단계만 선택하세요</small>
+                </div>
+                <div class="card-body">
+                    <!-- 1단계: 기본 보안 검사 -->
+                    <div class="card border-primary mb-3">
+                        <div class="card-header bg-primary text-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-shield-alt me-2"></i>
+                                    1단계: 기본 보안 검사 (5-10분)
+                                </h6>
+                                <button type="button" class="btn btn-sm btn-outline-light" onclick="selectStep(1)">
+                                    이 단계만 선택
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p class="small text-muted mb-3">웹사이트의 기본적인 보안 상태를 빠르게 확인합니다.</p>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input step-1" type="checkbox" name="test_types" 
+                                               value="ssl_tls_test" id="ssl_test">
+                                        <label class="form-check-label" for="ssl_test">
+                                            <i class="fas fa-lock text-success me-1"></i>
+                                            SSL/TLS 보안 검사
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input step-1" type="checkbox" name="test_types" 
+                                               value="header_security" id="header_security">
+                                        <label class="form-check-label" for="header_security">
+                                            <i class="fas fa-file-code text-info me-1"></i>
+                                            보안 헤더 검사
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input step-1" type="checkbox" name="test_types" 
+                                               value="port_scan" id="port_scan">
+                                        <label class="form-check-label" for="port_scan">
+                                            <i class="fas fa-network-wired text-warning me-1"></i>
+                                            포트 스캔
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input step-1" type="checkbox" name="test_types" 
+                                               value="basic_info_gathering" id="basic_info">
+                                        <label class="form-check-label" for="basic_info">
+                                            <i class="fas fa-search text-secondary me-1"></i>
+                                            기본 정보 수집
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2단계: 웹 애플리케이션 취약점 -->
+                    <div class="card border-success mb-3">
+                        <div class="card-header bg-success text-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-bug me-2"></i>
+                                    2단계: 웹 애플리케이션 취약점 (15-20분)
+                                </h6>
+                                <button type="button" class="btn btn-sm btn-outline-light" onclick="selectStep(2)">
+                                    이 단계만 선택
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p class="small text-muted mb-3">OWASP Top 10 기반의 주요 웹 취약점을 검사합니다.</p>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input step-2" type="checkbox" name="test_types" 
+                                               value="sql_injection" id="sql_injection">
+                                        <label class="form-check-label" for="sql_injection">
+                                            <i class="fas fa-database text-danger me-1"></i>
+                                            SQL 인젝션 테스트
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input step-2" type="checkbox" name="test_types" 
+                                               value="xss_testing" id="xss_testing">
+                                        <label class="form-check-label" for="xss_testing">
+                                            <i class="fas fa-code text-warning me-1"></i>
+                                            XSS 취약점 테스트
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input step-2" type="checkbox" name="test_types" 
+                                               value="csrf_testing" id="csrf_testing">
+                                        <label class="form-check-label" for="csrf_testing">
+                                            <i class="fas fa-shield-alt text-info me-1"></i>
+                                            CSRF 취약점 테스트
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input step-2" type="checkbox" name="test_types" 
+                                               value="directory_traversal" id="directory_traversal">
+                                        <label class="form-check-label" for="directory_traversal">
+                                            <i class="fas fa-folder-open text-secondary me-1"></i>
+                                            디렉토리 트래버설
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3단계: 인증 및 세션 보안 -->
+                    <div class="card border-warning mb-3">
+                        <div class="card-header bg-warning text-dark">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-key me-2"></i>
+                                    3단계: 인증 및 세션 보안 (10-15분)
+                                </h6>
+                                <button type="button" class="btn btn-sm btn-outline-dark" onclick="selectStep(3)">
+                                    이 단계만 선택
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p class="small text-muted mb-3">로그인, 세션 관리, 권한 제어 관련 보안을 검사합니다.</p>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input step-3" type="checkbox" name="test_types" 
+                                               value="authentication_test" id="auth_test">
+                                        <label class="form-check-label" for="auth_test">
+                                            <i class="fas fa-user-lock text-primary me-1"></i>
+                                            인증/인가 테스트
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input step-3" type="checkbox" name="test_types" 
+                                               value="brute_force" id="brute_force">
+                                        <label class="form-check-label" for="brute_force">
+                                            <i class="fas fa-hammer text-danger me-1"></i>
+                                            브루트포스 공격 테스트
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input step-3" type="checkbox" name="test_types" 
+                                               value="session_management" id="session_mgmt">
+                                        <label class="form-check-label" for="session_mgmt">
+                                            <i class="fas fa-clock text-info me-1"></i>
+                                            세션 관리 테스트
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input step-3" type="checkbox" name="test_types" 
+                                               value="password_policy" id="password_policy">
+                                        <label class="form-check-label" for="password_policy">
+                                            <i class="fas fa-key text-success me-1"></i>
+                                            패스워드 정책 검사
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4단계: 고급 보안 검사 -->
+                    <div class="card border-danger mb-3">
+                        <div class="card-header bg-danger text-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-search-plus me-2"></i>
+                                    4단계: 고급 보안 검사 (20-30분)
+                                </h6>
+                                <button type="button" class="btn btn-sm btn-outline-light" onclick="selectStep(4)">
+                                    이 단계만 선택
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p class="small text-muted mb-3">심화된 보안 검사와 코드 레벨 분석을 수행합니다.</p>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input step-4" type="checkbox" name="test_types" 
+                                               value="static_code_analysis" id="static_code">
+                                        <label class="form-check-label" for="static_code">
+                                            <i class="fas fa-code text-primary me-1"></i>
+                                            정적 코드 분석
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input step-4" type="checkbox" name="test_types" 
+                                               value="dependency_scan" id="dependency_scan">
+                                        <label class="form-check-label" for="dependency_scan">
+                                            <i class="fas fa-puzzle-piece text-warning me-1"></i>
+                                            의존성 취약점 스캔
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input step-4" type="checkbox" name="test_types" 
+                                               value="file_upload" id="file_upload">
+                                        <label class="form-check-label" for="file_upload">
+                                            <i class="fas fa-upload text-danger me-1"></i>
+                                            파일 업로드 취약점
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input step-4" type="checkbox" name="test_types" 
+                                               value="secret_detection" id="secret_detection">
+                                        <label class="form-check-label" for="secret_detection">
+                                            <i class="fas fa-eye-slash text-secondary me-1"></i>
+                                            시크릿 키 탐지
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 빠른 선택 버튼들 -->
+                    <div class="mt-4 text-center">
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-primary" onclick="selectSteps([1,2])">
+                                <i class="fas fa-bolt me-1"></i>
+                                빠른 검사 (1+2단계)
+                            </button>
+                            <button type="button" class="btn btn-success" onclick="selectSteps([1,2,3])">
+                                <i class="fas fa-shield-alt me-1"></i>
+                                표준 검사 (1+2+3단계)
+                            </button>
+                            <button type="button" class="btn btn-danger" onclick="selectSteps([1,2,3,4])">
+                                <i class="fas fa-microscope me-1"></i>
+                                전체 검사 (모든 단계)
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3 text-center">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="clearAll()">
+                            <i class="fas fa-times me-1"></i>
+                            전체 해제
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-rocket me-2"></i>
+                    보안 테스트 시작
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- 사이드바 정보 -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    테스트 정보
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6><i class="fas fa-clock text-primary me-1"></i> 단계별 소요 시간</h6>
+                    <p class="small text-muted">
+                        • 1단계 (기본): 5-10분<br>
+                        • 2단계 (웹취약점): 15-20분<br>
+                        • 3단계 (인증보안): 10-15분<br>
+                        • 4단계 (고급검사): 20-30분
+                    </p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6><i class="fas fa-robot text-success me-1"></i> AI 에이전트</h6>
+                    <p class="small text-muted">
+                        • 6개 실행자 AI가 병렬 테스트<br>
+                        • 3개 분석가 AI가 결과 분석<br>
+                        • 1개 결정자 AI가 최종 판단<br>
+                        <strong>→ 총 10개 AI가 협업!</strong>
+                    </p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6><i class="fas fa-shield-alt text-warning me-1"></i> 안전성</h6>
+                    <p class="small text-muted">
+                        모든 테스트는 안전한 범위 내에서 수행되며, 
+                        실제 시스템에 해를 끼치지 않습니다.
+                    </p>
+                </div>
+                
+                <div class="alert alert-success">
+                    <i class="fas fa-rocket me-1"></i>
+                    <strong>처음 사용하시나요?</strong><br>
+                    <small>
+                        웹사이트 유형을 선택한 후 
+                        "빠른 검사" 버튼을 클릭하세요!<br>
+                        가장 중요한 보안 검사를 자동으로 선택해드립니다.
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    추천 테스트
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h6><i class="fas fa-route me-1"></i> 단계별 진행 가이드</h6>
+                    <div class="small">
+                        <strong>🚀 처음 사용:</strong> "빠른 검사" 버튼 클릭<br>
+                        <strong>📊 정기 점검:</strong> "표준 검사" 버튼 클릭<br>
+                        <strong>🔍 상세 분석:</strong> "전체 검사" 버튼 클릭<br>
+                        <strong>🎯 맞춤 검사:</strong> 원하는 단계만 개별 선택
+                    </div>
+                </div>
+                
+                <div class="mb-2">
+                    <strong>💡 단계별 설명:</strong>
+                </div>
+                <div class="small text-muted">
+                    <div class="mb-1">
+                        <span class="badge bg-primary">1단계</span> 
+                        기본 보안 상태 확인 (SSL, 헤더, 포트)
+                    </div>
+                    <div class="mb-1">
+                        <span class="badge bg-success">2단계</span> 
+                        웹 취약점 검사 (SQL인젝션, XSS, CSRF)
+                    </div>
+                    <div class="mb-1">
+                        <span class="badge bg-warning">3단계</span> 
+                        인증 보안 검사 (로그인, 세션, 권한)
+                    </div>
+                    <div class="mb-1">
+                        <span class="badge bg-danger">4단계</span> 
+                        고급 검사 (코드분석, 의존성, 파일업로드)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// 전체 해제
+function clearAll() {
+    const checkboxes = document.querySelectorAll('input[name="test_types"]');
+    checkboxes.forEach(checkbox => checkbox.checked = false);
+}
+
+// 특정 단계 선택
+function selectStep(step) {
+    clearAll();
+    const stepCheckboxes = document.querySelectorAll(`.step-${step}`);
+    stepCheckboxes.forEach(checkbox => checkbox.checked = true);
+}
+
+// 여러 단계 선택
+function selectSteps(steps) {
+    clearAll();
+    steps.forEach(step => {
+        const stepCheckboxes = document.querySelectorAll(`.step-${step}`);
+        stepCheckboxes.forEach(checkbox => checkbox.checked = true);
+    });
+}
+
+// 대상 유형에 따른 자동 추천 (기본값)
+document.querySelector('select[name="target_type"]').addEventListener('change', function() {
+    const targetType = this.value;
+    
+    // 기본적으로 1+2단계 선택 (빠른 검사)
+    selectSteps([1, 2]);
+    
+    // 특정 유형에 따른 추가 선택
+    if (targetType === 'ecommerce') {
+        // 전자상거래는 인증 보안이 중요하므로 3단계도 추가
+        selectSteps([1, 2, 3]);
+    } else if (targetType === 'rest_api' || targetType === 'graphql_api') {
+        // API는 코드 분석도 중요하므로 4단계 일부 추가
+        selectSteps([1, 2]);
+        document.getElementById('static_code_analysis').checked = true;
+    }
+});
+</script>
+{% endblock %}

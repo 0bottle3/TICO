@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}대시보드 - AI 보안 테스트 시스템{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-tachometer-alt text-primary me-2"></i>
+        대시보드
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="/security-test" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i>
+            새 보안 테스트
+        </a>
+    </div>
+</div>
+
+<!-- AI 상태 카드 -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-brain fa-2x {% if api_status.openai %}text-success{% else %}text-muted{% endif %}"></i>
+                </div>
+                <h5 class="card-title">OpenAI</h5>
+                <span class="badge {% if api_status.openai %}bg-success{% else %}bg-secondary{% endif %} status-badge">
+                    {% if api_status.openai %}연결됨{% else %}미설정{% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-robot fa-2x {% if api_status.claude %}text-success{% else %}text-muted{% endif %}"></i>
+                </div>
+                <h5 class="card-title">Claude</h5>
+                <span class="badge {% if api_status.claude %}bg-success{% else %}bg-secondary{% endif %} status-badge">
+                    {% if api_status.claude %}연결됨{% else %}미설정{% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-gem fa-2x {% if api_status.gemini %}text-success{% else %}text-muted{% endif %}"></i>
+                </div>
+                <h5 class="card-title">Gemini</h5>
+                <span class="badge {% if api_status.gemini %}bg-success{% else %}bg-secondary{% endif %} status-badge">
+                    {% if api_status.gemini %}연결됨{% else %}미설정{% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 설정 안내 -->
+{% if not (api_status.openai and api_status.claude and api_status.gemini) %}
+<div class="alert alert-warning" role="alert">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    <strong>설정이 필요합니다!</strong>
+    AI API 키를 설정하여 보안 테스트를 시작하세요.
+    <a href="/settings" class="alert-link">설정 페이지로 이동</a>
+</div>
+{% endif %}
+
+<!-- 최근 테스트 결과 -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="fas fa-history me-2"></i>
+            최근 테스트 결과
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if recent_tests %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>대상</th>
+                        <th>유형</th>
+                        <th>상태</th>
+                        <th>진행률</th>
+                        <th>시작 시간</th>
+                        <th>액션</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for test in recent_tests %}
+                    <tr>
+                        <td>
+                            <i class="fas fa-globe me-1"></i>
+                            {{ test.target_url }}
+                        </td>
+                        <td>
+                            <span class="badge bg-info">{{ test.target_type }}</span>
+                        </td>
+                        <td>
+                            {% if test.status == 'completed' %}
+                                <span class="badge bg-success">완료</span>
+                            {% elif test.status == 'running' %}
+                                <span class="badge bg-primary">실행중</span>
+                            {% elif test.status == 'failed' %}
+                                <span class="badge bg-danger">실패</span>
+                            {% else %}
+                                <span class="badge bg-secondary">대기중</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar" role="progressbar" 
+                                     style="width: {{ test.progress or 0 }}%"
+                                     aria-valuenow="{{ test.progress or 0 }}" 
+                                     aria-valuemin="0" aria-valuemax="100">
+                                    {{ test.progress or 0 }}%
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ test.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>
+                            <a href="/test-result/{{ test.id }}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+            <p class="text-muted">아직 실행된 테스트가 없습니다.</p>
+            <a href="/security-test" class="btn btn-primary">
+                첫 번째 보안 테스트 시작하기
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

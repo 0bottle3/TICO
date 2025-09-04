@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+
+{% block title %}테스트 결과 - AI 보안 테스트 시스템{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-chart-line text-primary me-2"></i>
+        테스트 결과
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="/security-test" class="btn btn-outline-primary">
+            <i class="fas fa-plus me-1"></i>
+            새 테스트
+        </a>
+    </div>
+</div>
+
+<!-- 테스트 정보 -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-8">
+                <h5>
+                    <i class="fas fa-globe me-2"></i>
+                    {{ test.target_url }}
+                </h5>
+                <p class="text-muted mb-2">
+                    <span class="badge bg-info me-2">{{ test.target_type }}</span>
+                    테스트 ID: {{ test.id }}
+                </p>
+                <p class="mb-0">
+                    <small class="text-muted">
+                        시작: {{ test.created_at.strftime('%Y년 %m월 %d일 %H:%M') }}
+                    </small>
+                </p>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="mb-2">
+                    {% if test.status == 'completed' %}
+                        <span class="badge bg-success fs-6">완료</span>
+                    {% elif test.status == 'running' %}
+                        <span class="badge bg-primary fs-6">실행중</span>
+                    {% elif test.status == 'failed' %}
+                        <span class="badge bg-danger fs-6">실패</span>
+                    {% else %}
+                        <span class="badge bg-secondary fs-6">대기중</span>
+                    {% endif %}
+                </div>
+                <div class="progress" style="height: 25px;">
+                    <div class="progress-bar" role="progressbar" 
+                         style="width: {{ test.progress or 0 }}%"
+                         aria-valuenow="{{ test.progress or 0 }}" 
+                         aria-valuemin="0" aria-valuemax="100">
+                        {{ test.progress or 0 }}%
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if test.status == 'running' %}
+<!-- 실행 중 상태 -->
+<div class="card mb-4">
+    <div class="card-body text-center">
+        <div class="spinner-border text-primary mb-3" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <h5>AI 에이전트들이 보안 테스트를 수행 중입니다...</h5>
+        <p class="text-muted">
+            여러 AI가 병렬로 작업하고 있습니다. 잠시만 기다려주세요.
+        </p>
+        
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card border-primary">
+                    <div class="card-body">
+                        <i class="fas fa-cogs fa-2x text-primary mb-2"></i>
+                        <h6>실행자 AI</h6>
+                        <small class="text-muted">6개 AI가 테스트 수행</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-success">
+                    <div class="card-body">
+                        <i class="fas fa-search fa-2x text-success mb-2"></i>
+                        <h6>분석가 AI</h6>
+                        <small class="text-muted">3개 AI가 결과 분석</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-warning">
+                    <div class="card-body">
+                        <i class="fas fa-gavel fa-2x text-warning mb-2"></i>
+                        <h6>결정자 AI</h6>
+                        <small class="text-muted">최종 판단 대기</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% elif test.status == 'completed' and test.results %}
+<!-- 완료된 테스트 결과 -->
+<div class="row">
+    <div class="col-md-8">
+        <!-- 보안 점수 -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-shield-alt me-2"></i>
+                    종합 보안 점수
+                </h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="progress-circle mx-auto mb-3" style="width: 120px; height: 120px;">
+                            <svg class="progress-ring" width="120" height="120">
+                                <circle class="progress-ring-circle" stroke="#e9ecef" stroke-width="8" 
+                                        fill="transparent" r="52" cx="60" cy="60"/>
+                                <circle class="progress-ring-circle" stroke="#28a745" stroke-width="8" 
+                                        fill="transparent" r="52" cx="60" cy="60"
+                                        stroke-dasharray="327" stroke-dashoffset="65"/>
+                            </svg>
+                            <div class="progress-text">
+                                <span class="h2 text-success">85</span>
+                                <small class="d-block text-muted">/ 100</small>
+                            </div>
+                        </div>
+                        <h5 class="text-success">양호</h5>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-start">
+                            <div class="mb-2">
+                                <span class="badge bg-success me-2">해결됨</span>
+                                <span>12개 이슈</span>
+                            </div>
+                            <div class="mb-2">
+                                <span class="badge bg-warning me-2">주의</span>
+                                <span>3개 이슈</span>
+                            </div>
+                            <div class="mb-2">
+                                <span class="badge bg-danger me-2">위험</span>
+                                <span>1개 이슈</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 발견된 취약점 -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    발견된 취약점
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="accordion" id="vulnerabilityAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" 
+                                    data-bs-target="#vuln1">
+                                <span class="badge bg-danger me-2">위험</span>
+                                SQL 인젝션 취약점
+                            </button>
+                        </h2>
+                        <div id="vuln1" class="accordion-collapse collapse show">
+                            <div class="accordion-body">
+                                <p><strong>위치:</strong> /login 페이지의 username 파라미터</p>
+                                <p><strong>설명:</strong> 사용자 입력이 적절히 검증되지 않아 SQL 인젝션 공격이 가능합니다.</p>
+                                <p><strong>권장사항:</strong> 
+                                    매개변수화된 쿼리 사용, 입력 검증 강화
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                    data-bs-target="#vuln2">
+                                <span class="badge bg-warning me-2">주의</span>
+                                보안 헤더 누락
+                            </button>
+                        </h2>
+                        <div id="vuln2" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <p><strong>누락된 헤더:</strong> X-Frame-Options, Content-Security-Policy</p>
+                                <p><strong>설명:</strong> 중요한 보안 헤더가 설정되지 않았습니다.</p>
+                                <p><strong>권장사항:</strong> 
+                                    웹 서버 설정에서 보안 헤더 추가
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 사이드바 -->
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-download me-1"></i>
+                    리포트 다운로드
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-file-pdf me-1"></i>
+                        PDF 리포트
+                    </button>
+                    <button class="btn btn-outline-success btn-sm">
+                        <i class="fas fa-file-excel me-1"></i>
+                        Excel 리포트
+                    </button>
+                    <button class="btn btn-outline-info btn-sm">
+                        <i class="fas fa-file-code me-1"></i>
+                        JSON 데이터
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-robot me-1"></i>
+                    AI 분석 요약
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6 class="text-primary">OpenAI 분석</h6>
+                    <p class="small">전반적인 보안 수준은 양호하나, 인증 부분 강화 필요</p>
+                </div>
+                <div class="mb-3">
+                    <h6 class="text-success">Claude 분석</h6>
+                    <p class="small">SQL 인젝션 취약점이 가장 우선적으로 해결해야 할 이슈</p>
+                </div>
+                <div class="mb-3">
+                    <h6 class="text-warning">Gemini 분석</h6>
+                    <p class="small">보안 헤더 설정으로 추가적인 보안 강화 가능</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% elif test.status == 'failed' %}
+<!-- 실패한 테스트 -->
+<div class="card mb-4">
+    <div class="card-body text-center">
+        <i class="fas fa-exclamation-circle fa-3x text-danger mb-3"></i>
+        <h5>테스트 실행 중 오류가 발생했습니다</h5>
+        {% if test.error_message %}
+        <p class="text-muted">{{ test.error_message }}</p>
+        {% endif %}
+        <a href="/security-test" class="btn btn-primary">
+            다시 시도하기
+        </a>
+    </div>
+</div>
+
+{% else %}
+<!-- 대기 중 상태 -->
+<div class="card mb-4">
+    <div class="card-body text-center">
+        <i class="fas fa-hourglass-half fa-3x text-secondary mb-3"></i>
+        <h5>테스트 시작 대기 중</h5>
+        <p class="text-muted">잠시만 기다려주세요...</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if test.status == 'running' %}
+<script>
+// 실행 중인 테스트의 상태를 주기적으로 확인
+function checkTestStatus() {
+    fetch('/api/test-status/{{ test.id }}')
+        .then(response => response.json())
+        .then(data => {
+            if (data.status !== 'running') {
+                location.reload();
+            }
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+// 5초마다 상태 확인
+setInterval(checkTestStatus, 5000);
+</script>
+{% endif %}
+{% endblock %}

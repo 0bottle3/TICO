@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block title %}설정 - AI 보안 테스트 시스템{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-cog text-primary me-2"></i>
+        설정
+    </h1>
+</div>
+
+{% if request.query_params.get('saved') %}
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="fas fa-check-circle me-2"></i>
+    설정이 성공적으로 저장되었습니다!
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endif %}
+
+<form method="post" action="/settings/api-keys">
+    <!-- OpenAI 설정 -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-brain text-success me-2"></i>
+                OpenAI 설정
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">API 제공업체</label>
+                        <select class="form-select" name="openai_type" id="openai_type">
+                            <option value="direct">OpenAI 직접 API</option>
+                            <option value="azure">Azure OpenAI</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">API 키</label>
+                        <input type="password" class="form-control" name="openai_key" 
+                               placeholder="sk-..." autocomplete="off">
+                        <div class="form-text">OpenAI 또는 Azure OpenAI API 키를 입력하세요</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="azure_settings" style="display: none;">
+                <div class="mb-3">
+                    <label class="form-label">Azure Endpoint</label>
+                    <input type="url" class="form-control" name="azure_endpoint" 
+                           placeholder="https://your-resource.openai.azure.com/">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Claude 설정 -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-robot text-info me-2"></i>
+                Claude 설정
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">API 제공업체</label>
+                        <select class="form-select" name="claude_type" id="claude_type">
+                            <option value="direct">Anthropic 직접 API</option>
+                            <option value="bedrock">AWS Bedrock</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3" id="claude_key_field">
+                        <label class="form-label">API 키</label>
+                        <input type="password" class="form-control" name="claude_key" 
+                               placeholder="sk-ant-..." autocomplete="off">
+                        <div class="form-text">Anthropic API 키를 입력하세요</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="bedrock_settings" style="display: none;">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">AWS Access Key</label>
+                            <input type="password" class="form-control" name="aws_access_key" 
+                                   placeholder="AKIA..." autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">AWS Secret Key</label>
+                            <input type="password" class="form-control" name="aws_secret_key" 
+                                   autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">AWS Region</label>
+                            <select class="form-select" name="aws_region">
+                                <option value="us-east-1">us-east-1</option>
+                                <option value="us-west-2">us-west-2</option>
+                                <option value="eu-west-1">eu-west-1</option>
+                                <option value="ap-northeast-1">ap-northeast-1</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gemini 설정 -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-gem text-warning me-2"></i>
+                Google Gemini 설정
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">API 제공업체</label>
+                        <select class="form-select" name="gemini_type" id="gemini_type">
+                            <option value="direct">Google AI 직접 API</option>
+                            <option value="vertex">Vertex AI</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3" id="gemini_key_field">
+                        <label class="form-label">API 키</label>
+                        <input type="password" class="form-control" name="gemini_key" 
+                               placeholder="AI..." autocomplete="off">
+                        <div class="form-text">Google AI API 키를 입력하세요</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="vertex_settings" style="display: none;">
+                <div class="mb-3">
+                    <label class="form-label">GCP Project ID</label>
+                    <input type="text" class="form-control" name="gcp_project" 
+                           placeholder="your-project-id">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <button type="submit" class="btn btn-primary btn-lg">
+            <i class="fas fa-save me-2"></i>
+            설정 저장
+        </button>
+    </div>
+</form>
+
+<!-- 도움말 -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="fas fa-question-circle me-2"></i>
+            API 키 발급 방법
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <h6><i class="fas fa-brain text-success me-1"></i> OpenAI</h6>
+                <p class="small">
+                    <strong>직접 API:</strong> <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com</a><br>
+                    <strong>Azure:</strong> Azure Portal에서 OpenAI 리소스 생성
+                </p>
+            </div>
+            <div class="col-md-4">
+                <h6><i class="fas fa-robot text-info me-1"></i> Claude</h6>
+                <p class="small">
+                    <strong>직접 API:</strong> <a href="https://console.anthropic.com/" target="_blank">console.anthropic.com</a><br>
+                    <strong>Bedrock:</strong> AWS Console에서 Bedrock 서비스 활성화
+                </p>
+            </div>
+            <div class="col-md-4">
+                <h6><i class="fas fa-gem text-warning me-1"></i> Gemini</h6>
+                <p class="small">
+                    <strong>직접 API:</strong> <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a><br>
+                    <strong>Vertex AI:</strong> GCP Console에서 Vertex AI 활성화
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// OpenAI 타입 변경시 Azure 설정 표시/숨김
+document.getElementById('openai_type').addEventListener('change', function() {
+    const azureSettings = document.getElementById('azure_settings');
+    if (this.value === 'azure') {
+        azureSettings.style.display = 'block';
+    } else {
+        azureSettings.style.display = 'none';
+    }
+});
+
+// Claude 타입 변경시 Bedrock 설정 표시/숨김
+document.getElementById('claude_type').addEventListener('change', function() {
+    const bedrockSettings = document.getElementById('bedrock_settings');
+    const claudeKeyField = document.getElementById('claude_key_field');
+    
+    if (this.value === 'bedrock') {
+        bedrockSettings.style.display = 'block';
+        claudeKeyField.style.display = 'none';
+    } else {
+        bedrockSettings.style.display = 'none';
+        claudeKeyField.style.display = 'block';
+    }
+});
+
+// Gemini 타입 변경시 Vertex 설정 표시/숨김
+document.getElementById('gemini_type').addEventListener('change', function() {
+    const vertexSettings = document.getElementById('vertex_settings');
+    const geminiKeyField = document.getElementById('gemini_key_field');
+    
+    if (this.value === 'vertex') {
+        vertexSettings.style.display = 'block';
+        geminiKeyField.style.display = 'none';
+    } else {
+        vertexSettings.style.display = 'none';
+        geminiKeyField.style.display = 'block';
+    }
+});
+</script>
+{% endblock %}

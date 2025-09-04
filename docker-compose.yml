@@ -1,0 +1,202 @@
+version: '3.8'
+
+services:
+  # 데이터베이스
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: security_test
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - security_network
+
+  # Redis (메시지 큐)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - security_network
+
+  # 관리자 AI 서비스
+  manager-ai:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.manager
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DATABASE_URL=postgresql://admin:password123@postgres:5432/security_test
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - "8000:8000"
+    networks:
+      - security_network
+
+  # 정적 분석 실행자들
+  static-executor-openai:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.executor
+    environment:
+      - AI_PROVIDER=openai
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - REDIS_URL=redis://redis:6379
+      - EXECUTOR_TYPE=static
+    depends_on:
+      - redis
+    networks:
+      - security_network
+
+  static-executor-claude:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.executor
+    environment:
+      - AI_PROVIDER=claude
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - REDIS_URL=redis://redis:6379
+      - EXECUTOR_TYPE=static
+    depends_on:
+      - redis
+    networks:
+      - security_network
+
+  static-executor-gemini:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.executor
+    environment:
+      - AI_PROVIDER=gemini
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - REDIS_URL=redis://redis:6379
+      - EXECUTOR_TYPE=static
+    depends_on:
+      - redis
+    networks:
+      - security_network
+
+  # 동적 테스트 실행자들
+  dynamic-executor-openai:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.executor
+    environment:
+      - AI_PROVIDER=openai
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - REDIS_URL=redis://redis:6379
+      - EXECUTOR_TYPE=dynamic
+    depends_on:
+      - redis
+    networks:
+      - security_network
+
+  dynamic-executor-claude:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.executor
+    environment:
+      - AI_PROVIDER=claude
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - REDIS_URL=redis://redis:6379
+      - EXECUTOR_TYPE=dynamic
+    depends_on:
+      - redis
+    networks:
+      - security_network
+
+  dynamic-executor-gemini:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.executor
+    environment:
+      - AI_PROVIDER=gemini
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - REDIS_URL=redis://redis:6379
+      - EXECUTOR_TYPE=dynamic
+    depends_on:
+      - redis
+    networks:
+      - security_network
+
+  # 분석가 AI들
+  analyzer-claude:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.analyzer
+    environment:
+      - AI_PROVIDER=claude
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    networks:
+      - security_network
+
+  analyzer-gemini:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.analyzer
+    environment:
+      - AI_PROVIDER=gemini
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    networks:
+      - security_network
+
+  analyzer-openai:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.analyzer
+    environment:
+      - AI_PROVIDER=openai
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    networks:
+      - security_network
+
+  # 결정자 AI
+  decision-ai:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.decision
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    networks:
+      - security_network
+
+  # 웹 대시보드
+  dashboard:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.web
+    environment:
+      - DATABASE_URL=postgresql://admin:password123@postgres:5432/security_test
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+      - manager-ai
+    networks:
+      - security_network
+
+volumes:
+  postgres_data:
+
+networks:
+  security_network:
+    driver: bridge
